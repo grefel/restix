@@ -37,6 +37,8 @@ var response = restix.fetch(request);
 $.writeln("Response Body: " + response.body);
 ```
 
+## Fully working example with Wordpress
+See [press2id](https://github.com/grefel/press2id) for a InDesign to Wordpress connection via REST.
 
 ## Add more REST Tools 
 * soon
