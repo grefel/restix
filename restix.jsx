@@ -45,16 +45,16 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 		if (request.port == undefined) request.port = "";		
 		if ( isNaN(request.port) ) throw Error ("[port] is Not a Number");
 		
-		if (request.command != "" && request.port != "") {
-			request.fullURL = request.url +  ":" + request.port + "/" + request.command
+		// Add port
+		if (request.port != "") {
+			request.fullURL = request.url +  ":" + request.port;
 		}
-		else if (request.command != "") {
-			request.fullURL = request.url +  "/" + request.command
+		// Add command 
+		if (request.command != "") {
+			request.fullURL = request.fullURL +  "/" + request.command;
 		}
-		else {
-			request.fullURL = request.url;
-		}
-		
+
+
 		if (request.method == undefined || request.method == "") request.method = "GET";
 		if (! ( request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE")) throw Error ("Method " + request.method + " is not supported");  // Missing HEAD 
 				
