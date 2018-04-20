@@ -49,6 +49,10 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 		if (request.port != "") {
 			request.fullURL = request.url +  ":" + request.port;
 		}
+		else {
+			request.fullURL = request.url;
+		}
+	
 		// Add command 
 		if (request.command != "") {
 			request.fullURL = request.fullURL +  "/" + request.command;
