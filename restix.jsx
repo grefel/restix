@@ -238,8 +238,7 @@ End Function
 		var response = INNER.processRequest(request, outFile);
 		if (!outFile.exists) {
 			response.error = true;
-			response.errorMsg = "File was not created";
-			
+			response.errorMsg = "File was not created\n" + response.errorMsg;			
 		}
 		return response;
 	}
