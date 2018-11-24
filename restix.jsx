@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.0
-* @Date: 2018-04-04
+* @Version: 1.1
+* @Date: 2018-06-25
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
@@ -68,6 +68,8 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 		
 		request.unsafe = false;
 		
+		if (request.proxy == undefined) request.proxy = false;
+		
 		return request;
 	}
 
@@ -87,10 +89,21 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 		var result = "";
 		
 		if (INNER.isWindows()) {			
-			scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP")');
+			if (request.proxy != false) {
+				scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP.6.0")');				
+			}
+			else {
+				scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP")');
+			}
+			
 			scriptCommands.push('Dim res');
 			scriptCommands.push('On Error Resume Next');  
 			scriptCommands.push('xHttp.Open "' + request.method + '", "'+ request.fullURL +'", False');
+			
+			if (request.proxy != false) {
+				scriptCommands.push('xHttp.setProxy 2, "' + request.proxy + '"') ;
+			}
+			
 			for (var i = 0; i < request.headers.length; i++) {				
 				scriptCommands.push('xHttp.setRequestHeader "' + request.headers[i].name + '","' + request.headers[i].value + '"');
 			}
@@ -174,6 +187,11 @@ End Function
 				// Es gab einen Fall wo am Mac mit -k es nicht funktioniert hat curl: (35) Server aborted the SSL handshake
 				curlString += ' -k ';
 			}
+		
+			if (request.proxy != false) {
+				curlString += ' --proxy ' + request.proxy
+			}	
+		
 			curlString += ' -X ' + request.method;
 			curlString += ' -d \'' + request.body.replace(/"/g, '\\"') + '\''
 			if (outFile) {
@@ -256,6 +274,10 @@ End Function
 //~ 	method:"GET|POST", // defaults to GET
 //~ 	headers:[{name:"String", value:"String"}], // defaults to []
 //~ 	body:"" // defaults to ""
+//~ }
+
+//~ var request = {
+//~ 	url:"https://www.publishingx.de"
 //~ }
 
 //~ var response = restix.fetch(request);
