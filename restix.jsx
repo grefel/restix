@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.1
-* @Date: 2018-06-25
+* @Version: 1.2
+* @Date: 2018-11-24
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2018-04-04-1.0";
+	INNER.version = "2018-11-24-1.2";
 		
 		
 	/** Returns if the operating system is windows 
@@ -61,11 +61,15 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 
 		if (request.method == undefined || request.method == "") request.method = "GET";
 		if (! ( request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE")) throw Error ("Method " + request.method + " is not supported");  // Missing HEAD 
+		
+		if (request.method == "POST" && ( request.binaryFilePath == undefined || request.binaryFilePath == "" )) request.binaryFilePath = false;
 				
 		if (request.headers == undefined) request.headers = [];
 		if ( ! ( request.headers instanceof Array ) ) throw Error ("Provide [headers] as Array of {name:'',value''} objects");
-		if (request.body == undefined || request.body == "") request.body = "";
-		
+		if (request.body == undefined || request.body == "") request.body = false;
+
+		if (request.body && request.binaryFilePath) throw Error ("You must not provide [body] and [binaryFilePath]");
+
 		request.unsafe = false;
 		
 		if (request.proxy == undefined) request.proxy = false;
@@ -95,6 +99,10 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 			else {
 				scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP")');
 			}
+			// Konstanten für ADODB.Stream
+			scriptCommands.push('Const adTypeBinary = 1');
+			scriptCommands.push('Const adSaveCreateOverWrite = 2');
+			scriptCommands.push('Const adModeReadWrite = 3');
 			
 			scriptCommands.push('Dim res');
 			scriptCommands.push('On Error Resume Next');  
@@ -112,21 +120,38 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 				//~ ' 13056 means ignore all server side cert error
 				scriptCommands.push('xHttp.setOption 2, 13056');
 			}
-			scriptCommands.push('xHttp.Send "' + request.body.replace(/"/g, '""') + '"');
+		
+			if (request.body) { 
+				scriptCommands.push('xHttp.Send "' + request.body.replace(/"/g, '""').replace(/\n|\r/g, '') + '"');
+			}
+			else if (request.method == "POST" && request.binaryFilePath) {
+				// http://www.vbforums.com/showthread.php?418570-RESOLVED-HTTP-POST-a-zip-file
+				scriptCommands.push('    Dim sFile');
+				scriptCommands.push('    sFile = "' + request.binaryFilePath + '"');
+
+
+				scriptCommands.push('    Set objStream = CreateObject("ADODB.Stream")');
+				scriptCommands.push('    objStream.Type = adTypeBinary');
+				scriptCommands.push('    objStream.Mode = adModeReadWrite');
+				scriptCommands.push('    objStream.Open');
+				scriptCommands.push('    objStream.LoadFromFile(sFile)');
+
+				scriptCommands.push('    xHttp.SetRequestHeader "Content-Length", objStream.Size');
+				scriptCommands.push('    xHttp.Send objStream.Read(objStream.Size)');
+				scriptCommands.push('    Set objStream= Nothing'); 
+			}
+	
 			scriptCommands.push('If err.Number = 0 Then');
 
 			if (outFile) {
-				// https://www.motobit.com/tips/detpg_read-write-binary-files/
-				scriptCommands.push('    Const adTypeBinary = 1');
-				scriptCommands.push('    Const adSaveCreateOverWrite = 2');
-				
-				scriptCommands.push('    Set oStream = CreateObject("ADODB.Stream")');
-				scriptCommands.push('    oStream.Open');
-				scriptCommands.push('    oStream.Type = adTypeBinary');
-				scriptCommands.push('    oStream.Write xHttp.responseBody');				
-				scriptCommands.push('    oStream.SaveToFile "' + outFile.fsName + '" , adSaveCreateOverWrite');
-				scriptCommands.push('    oStream.Close');
-
+				scriptCommands.push('    Set objStream = CreateObject("ADODB.Stream")');
+				scriptCommands.push('    objStream.Type = adTypeBinary');
+				scriptCommands.push('    objStream.Mode = adModeReadWrite');
+				scriptCommands.push('    objStream.Open');
+				scriptCommands.push('    objStream.Write xHttp.responseBody');				
+				scriptCommands.push('    objStream.SaveToFile "' + outFile.fsName + '" , adSaveCreateOverWrite');
+				scriptCommands.push('    objStream.Close');
+				scriptCommands.push('    Set objStream= Nothing'); 
 /*	
    ADODB.Stream let's you also save text data and let's you specify charset (codepage) for text-to-binary data conversion (against of Scripting.TextStream object). 
   Const adTypeText = 2
@@ -151,7 +176,6 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
   'Save binary data To disk
   BinaryStream.SaveToFile FileName, adSaveCreateOverWrite
 End Function
-	
 	*/
 				scriptCommands.push('	res = "outFile" & vbCr & "------http_code" &  xHttp.status' );
 			}
@@ -191,9 +215,15 @@ End Function
 			if (request.proxy != false) {
 				curlString += ' --proxy ' + request.proxy
 			}	
-		
+
 			curlString += ' -X ' + request.method;
-			curlString += ' -d \'' + request.body.replace(/"/g, '\\"') + '\''
+			if (request.body) { 
+				curlString += ' -d \'' + request.body.replace(/"/g, '\\"').replace(/\n|\r/g, '') + '\'';
+			}
+			else if (request.method == "POST" && request.binaryFilePath) {
+				curlString += ' --data-binary \'@' + request.binaryFilePath + '\'';
+			}
+			
 			if (outFile) {
 				curlString += ' -w \'outFile\n------http_code%{http_code}\'';
 				curlString += ' -o \'' + outFile.fsName+ '\''
