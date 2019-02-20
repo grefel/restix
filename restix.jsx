@@ -8,7 +8,7 @@
 See examples/connect.jsx
 
 * @Version: 1.2
-* @Date: 2018-11-24
+* @Date: 2019-02-20
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || ( function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2018-11-24-1.2";
+	INNER.version = "2019-02-20-1.2";
 		
 		
 	/** Returns if the operating system is windows 
@@ -242,6 +242,9 @@ End Function
 		}
 
 		// Fill response 
+		if (typeof result == 'undefined') {
+			throw Error ("No result value. Probably System Script could not run?");
+		}
 		if (result.match (/^xHttpError|^curl: \(\d+\)|^doScriptError:/)) {
 			response.error = true;
 			response.errorMsg = result;
@@ -253,7 +256,7 @@ End Function
 				response.body = resArray[0];
 			}
 			else {
-				throw Error ("Wrong result value: " + result);
+				throw Error ("Wrong result value: [" + result + "]");
 			}
 		}
 
@@ -297,20 +300,21 @@ End Function
 
 
 // Example Request
-//~ var request = {
-//~ 	url:"String",
-//~ 	command:"String", // defaults to ""
-//~ 	port:443, // defaults to ""
-//~ 	method:"GET|POST", // defaults to GET
-//~ 	headers:[{name:"String", value:"String"}], // defaults to []
-//~ 	body:"" // defaults to ""
-//~ }
+//  var request = {
+//  	url:"String",
+//  	command:"String", // defaults to ""
+//  	port:443, // defaults to ""
+//  	method:"GET|POST", // defaults to GET
+//  	headers:[{name:"String", value:"String"}], // defaults to []
+//  	body:"" // defaults to ""
+// }
 
-//~ var request = {
-//~ 	url:"https://www.publishingx.de"
-//~ }
+// var request = {
+//  	url:"https://www.publishingx.de"
+// }
 
-//~ var response = restix.fetch(request);
+// var response = restix.fetch(request);
+// $.writeln(response.toSource());
 
 //~ if (response.error) {
 //~ 	$.writeln("Response Error: " + response.error);
