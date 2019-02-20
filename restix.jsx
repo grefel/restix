@@ -93,12 +93,8 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		var result = "";
 
 		if (INNER.isWindows()) {
-			if (request.proxy != false) {
-				scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP.6.0")');
-			}
-			else {
-				scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP")');
-			}
+			// Since Win10 Update Feb 2019 msxml3 does not work anymore...
+			scriptCommands.push('Dim xHttp : Set xHttp = CreateObject("MSXML2.ServerXMLHTTP.6.0")');
 			// Konstanten für ADODB.Stream
 			scriptCommands.push('Const adTypeBinary = 1');
 			scriptCommands.push('Const adSaveCreateOverWrite = 2');
@@ -109,6 +105,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			scriptCommands.push('xHttp.Open "' + request.method + '", "' + request.fullURL + '", False');
 
 			if (request.proxy != false) {
+				// xHttp.SetProxy 1
 				scriptCommands.push('xHttp.setProxy 2, "' + request.proxy + '"');
 			}
 
@@ -140,7 +137,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				scriptCommands.push('    xHttp.Send objStream.Read(objStream.Size)');
 				scriptCommands.push('    Set objStream= Nothing');
 			}
-
+			else {
+				scriptCommands.push('xHttp.Send');
+			}
+			
 			scriptCommands.push('If err.Number = 0 Then');
 
 			if (outFile) {
