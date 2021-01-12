@@ -231,7 +231,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			else {
 				curlString += ' -w \'\n------http_code%{http_code}\'';
 			}
-			curlString += ' \'' + request.fullURL + '\'';
+			curlString += ' \'' + encodeURI(request.fullURL) + '\'';
 			//~ 			$.writeln(curlString);
 			try {
 				result = app.doScript('do shell script "' + curlString + '"', ScriptLanguage.APPLESCRIPT_LANGUAGE);
