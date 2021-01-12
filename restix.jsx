@@ -8,7 +8,7 @@
 See examples/connect.jsx
 
 * @Version: 1.2
-* @Date: 2019-02-20
+* @Date: 2021-01-12
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
