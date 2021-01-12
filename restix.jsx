@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2019-02-20-1.2";
+	INNER.version = "2021-01-12-1.2";
 
 
 	/** Returns if the operating system is windows 
