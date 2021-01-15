@@ -202,7 +202,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		}
 		else { // Mac
 			// -L follow redirects 
-			var curlString = 'curl --silent --show-error -g -L -i ';
+			var curlString = 'curl --silent --max-time 30 --show-error -g -L ';
 			for (var i = 0; i < request.headers.length; i++) {
 				curlString += (' -H \'' + request.headers[i].name + ': ' + request.headers[i].value + '\'');
 			}
@@ -215,7 +215,12 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				curlString += ' --proxy ' + request.proxy
 			}
 
-			curlString += ' -X ' + request.method;
+			if (request.method == "HEAD") {
+				curlString += ' -I --head ';
+			}
+			else {
+				curlString += ' -X ' + request.method;
+			}
 			if (request.body) {
 				curlString += ' -d \'' + request.body.replace(/"/g, '\\"').replace(/\n|\r/g, '') + '\'';
 			}
@@ -235,7 +240,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				request.fullURL = encodeURI(request.fullURL);
 			}
 			curlString += ' \'' + request.fullURL + '\'';
-			log.info(curlString);
+			// log.info(curlString);
 			try {
 				result = app.doScript('do shell script "' + curlString + '"', ScriptLanguage.APPLESCRIPT_LANGUAGE);
 			}
@@ -260,19 +265,28 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 					response.head = resArray[1];
 					response.httpStatus = resArray[2] * 1;
 				}
+				else {
+					throw Error("Wrong result value: [" + result + "]");
+				}
 			}
 			else {
-				result = result.replace(/\r\r/, "\r-----http-----");
 				var resArray = result.split("\r-----http-----");
-				if (resArray.length == 3) {
-					response.head = resArray[0];
-					response.body = resArray[1];
-					response.httpStatus = resArray[2] * 1;
-				}				
+				if (resArray.length == 2) {
+					if (request.method == "HEAD") {
+						response.head = resArray[0];
+						response.body = "";
+					}
+					else {
+						response.head = "";
+						response.body = resArray[0];
+					}
+					response.httpStatus = resArray[1] * 1;
+				}
+				else {
+					throw Error("Wrong result value: [" + result + "]");
+				}
 			}
-			if (resArray.length != 3) {
-				throw Error("Wrong result value: [" + result + "]");
-			}
+
 
 			var headSplit = response.head.split(/\n|\r/);
 			response.head = {}
@@ -325,20 +339,14 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 // Example Request
 //  var request = {
-//  	url:"String",
-//  	command:"String", // defaults to ""
-//  	port:443, // defaults to ""
-//  	method:"GET|POST", // defaults to GET
-//  	headers:[{name:"String", value:"String"}], // defaults to []
-//  	body:"" // defaults to ""
+//  	url:"https://www.publishingx.de/dfdf",
+//  	method:"HEAD", // defaults to GET
 // }
 
-// var request = {
-//  	url:"https://www.publishingx.de"
-// }
 
 // var response = restix.fetch(request);
-// $.writeln(response.toSource());
+// $.writeln(response.head.toSource());
+// $.writeln(response.httpStatus);
 
 //~ if (response.error) {
 //~ 	$.writeln("Response Error: " + response.error);
