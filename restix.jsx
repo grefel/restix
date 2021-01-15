@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.2
-* @Date: 2021-01-12
+* @Version: 1.3
+* @Date: 2021-01-15
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2021-01-12-1.2";
+	INNER.version = "2021-01-15-1.3";
 
 
 	/** Returns if the operating system is windows 
@@ -60,7 +60,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 
 		if (request.method == undefined || request.method == "") request.method = "GET";
-		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
+		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE" || request.method == "HEAD")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
 
 		if (request.method == "POST" && (request.binaryFilePath == undefined || request.binaryFilePath == "")) request.binaryFilePath = false;
 
@@ -140,7 +140,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			else {
 				scriptCommands.push('xHttp.Send');
 			}
-			
+
 			scriptCommands.push('If err.Number = 0 Then');
 
 			if (outFile) {
@@ -177,11 +177,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 					BinaryStream.SaveToFile FileName, adSaveCreateOverWrite
 				End Function
 					*/
-				scriptCommands.push('	res = "outFile" & vbCr & "------http_code" &  xHttp.status');
+				scriptCommands.push('	res = "outFile" &  vbCr & "-----http-----" & xHttp.getAllResponseHeaders &  vbCr & "-----http-----" &  xHttp.status');
 			}
 			else {
-				// ' give respones
-				scriptCommands.push('	res = xHttp.responseText  &  vbCr & "------http_code" &  xHttp.status');
+				scriptCommands.push('	res = xHttp.responseText  &  vbCr & "-----http-----" & xHttp.getAllResponseHeaders &  vbCr & "-----http-----" &  xHttp.status');
 			}
 
 			scriptCommands.push('Else');
@@ -203,7 +202,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		}
 		else { // Mac
 			// -L follow redirects 
-			var curlString = 'curl --silent --show-error -g -L ';
+			var curlString = 'curl --silent --show-error -g -L -i ';
 			for (var i = 0; i < request.headers.length; i++) {
 				curlString += (' -H \'' + request.headers[i].name + ': ' + request.headers[i].value + '\'');
 			}
@@ -225,17 +224,17 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 
 			if (outFile) {
-				curlString += ' -w \'outFile\n------http_code%{http_code}\'';
+				curlString += ' -w \'outFile\n-----http-----%{http_code}\'';
 				curlString += ' -o \'' + outFile.fsName + '\''
 			}
 			else {
-				curlString += ' -w \'\n------http_code%{http_code}\'';
+				curlString += ' -w \'\n-----http-----%{http_code}\'';
 			}
 			// not encoded, we need to encode;
 			if (decodeURI(request.fullURL) == request.fullURL) {
 				request.fullURL = encodeURI(request.fullURL);
 			}
-			curlString += ' \'' + request.fullURL  + '\'';
+			curlString += ' \'' + request.fullURL + '\'';
 			log.info(curlString);
 			try {
 				result = app.doScript('do shell script "' + curlString + '"', ScriptLanguage.APPLESCRIPT_LANGUAGE);
@@ -254,13 +253,45 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			response.errorMsg = result;
 		}
 		else {
-			var resArray = result.split("\r------http_code");
-			if (resArray.length == 2) {
-				response.httpStatus = resArray[1] * 1;
-				response.body = resArray[0];
+			if (INNER.isWindows()) {
+				var resArray = result.split("\r-----http-----");
+				if (resArray.length == 3) {
+					response.body = resArray[0];
+					response.head = resArray[1];
+					response.httpStatus = resArray[2] * 1;
+				}
 			}
 			else {
+				if (request.method == "HEAD") {
+					var resArray = result.split("\r-----http-----");
+					if (resArray.length == 2) {
+						response.head = resArray[0];
+						response.body = "";
+						response.httpStatus = resArray[1] * 1;
+						resArray.push("");
+					}				
+				}
+				else {
+					result = result.replace(/\r\r/, "\r-----http-----");
+					var resArray = result.split("\r-----http-----");
+					if (resArray.length == 3) {
+						response.head = resArray[0];
+						response.body = resArray[1];
+						response.httpStatus = resArray[2] * 1;
+					}				
+				}
+			}
+			if (resArray.length != 3) {
 				throw Error("Wrong result value: [" + result + "]");
+			}
+
+			var headSplit = response.head.split(/\n|\r/);
+			response.head = {}
+			for (var h = 0; h < headSplit.length; h++) {
+				var headProperty = headSplit[h];
+				if (headProperty.replace(/\s/g, '') == "") continue;
+				var colonIndex = headProperty.indexOf(":");
+				response.head[headProperty.substring(0, colonIndex).toLowerCase()] = headProperty.substring(colonIndex + 1).replace(/^ +/, "");
 			}
 		}
 
@@ -269,8 +300,8 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 
 	/****************
-    * API 
-    */
+	* API 
+	*/
 	/** Process an HTTP Request 
 	* @param {request} Request object with connection Information
 	* @return {response} Response object {error:error, errorMsg:errorMsg, body:body, httpStatus:httpStatus}
