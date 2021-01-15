@@ -262,24 +262,13 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				}
 			}
 			else {
-				if (request.method == "HEAD") {
-					var resArray = result.split("\r-----http-----");
-					if (resArray.length == 2) {
-						response.head = resArray[0];
-						response.body = "";
-						response.httpStatus = resArray[1] * 1;
-						resArray.push("");
-					}				
-				}
-				else {
-					result = result.replace(/\r\r/, "\r-----http-----");
-					var resArray = result.split("\r-----http-----");
-					if (resArray.length == 3) {
-						response.head = resArray[0];
-						response.body = resArray[1];
-						response.httpStatus = resArray[2] * 1;
-					}				
-				}
+				result = result.replace(/\r\r/, "\r-----http-----");
+				var resArray = result.split("\r-----http-----");
+				if (resArray.length == 3) {
+					response.head = resArray[0];
+					response.body = resArray[1];
+					response.httpStatus = resArray[2] * 1;
+				}				
 			}
 			if (resArray.length != 3) {
 				throw Error("Wrong result value: [" + result + "]");
