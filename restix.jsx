@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2021-01-15-1.3";
+	INNER.version = "2021-10-13-1.31";
 
 
 	/** Returns if the operating system is windows 
@@ -70,7 +70,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		if (request.body && request.binaryFilePath) throw Error("You must not provide [body] and [binaryFilePath]");
 
-		request.unsafe = false;
+		if (request.unsafe == undefined) request.unsafe = false;
 
 		if (request.proxy == undefined) request.proxy = false;
 
