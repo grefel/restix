@@ -11,7 +11,7 @@ See examples/connect.jsx
 * @Date: 2021-01-15
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
-** Library design pattern from Marc Aturet https://forums.adobe.com/thread/1111415
+** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
 */
 
 $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
