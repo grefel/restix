@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.31
-* @Date: 2021-10-14
+* @Version: 1.32
+* @Date: 2021-11-20
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -196,7 +196,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				result = app.doScript(scriptCommands, ScriptLanguage.VISUAL_BASIC);
 			}
 			catch (e) {
-				result = "doScriptError: " + e.message;
+				result = "doScriptError: " + e.message + " #" + e.number;
 			}
 
 		}
@@ -245,7 +245,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 				result = app.doScript('do shell script "' + curlString + '"', ScriptLanguage.APPLESCRIPT_LANGUAGE);
 			}
 			catch (e) {
-				result = "doScriptError: " + e.message;
+				result = "doScriptError: " + e.message + " #" + e.number;
 			}
 		}
 
