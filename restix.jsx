@@ -1,14 +1,14 @@
 ﻿/****************
 # Connect InDesign to the web
 * HTTPS supported 
-* Works form CS4 to CC 2018 (ExtendScript based library)
+* Works form CS4 to CC 2022 (ExtendScript based library)
 * Based on VBScript/ServerXMLHTTP (Win) AppleScript/curl (Mac) relies on app.doScript()
 
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.32
-* @Date: 2021-11-20
+* @Version: 1.33
+* @Date: 2022-03-29
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2021-10-13-1.31";
+	INNER.version = "2022-03-29-1.33";
 
 
 	/** Returns if the operating system is windows 
@@ -89,7 +89,6 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		};
 
 		var scriptCommands = [];
-		var systemCmd = "";
 		var result = "";
 
 		if (INNER.isWindows()) {
@@ -110,7 +109,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 
 			for (var i = 0; i < request.headers.length; i++) {
-				scriptCommands.push('xHttp.setRequestHeader "' + request.headers[i].name + '","' + request.headers[i].value + '"');
+				scriptCommands.push('xHttp.setRequestHeader "' + request.headers[i].name + '","' + request.headers[i].value.replace(/"/g, '""') + '"');
 			}
 			if (request.unsafe) {
 				//~ ' 2 stands for SXH_OPTION_IGNORE_SERVER_SSL_CERT_ERROR_FLAGS
@@ -319,6 +318,19 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* @param {outFile} File to write to
 	* @return {response} Response object {error:error, errorMsg:errorMsg, body:body, httpStatus:httpStatus}
 	*/
+	SELF.fetchFile = function (request, outFile) {
+		if (outFile == undefined) throw Error("No file provided");
+		if (outFile instanceof String) outFile = File(outFile);
+
+		request = INNER.checkRequest(request);
+		var response = INNER.processRequest(request, outFile);
+		if (!outFile.exists) {
+			response.error = true;
+			response.errorMsg = "File was not created\n" + response.errorMsg;
+		}
+		return response;
+	}
+
 	SELF.fetchFile = function (request, outFile) {
 		if (outFile == undefined) throw Error("No file provided");
 		if (outFile instanceof String) outFile = File(outFile);
