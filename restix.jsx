@@ -58,6 +58,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			request.fullURL = request.fullURL + "/" + request.command;
 		}
 
+		// not encoded, we need to encode;
+		if (decodeURI(request.fullURL) == request.fullURL) {
+			request.fullURL = encodeURI(request.fullURL);
+		}
 
 		if (request.method == undefined || request.method == "") request.method = "GET";
 		if (!(request.method == "GET" || request.method == "POST" || request.method == "PUT" || request.method == "PATCH" || request.method == "DELETE" || request.method == "HEAD")) throw Error("Method " + request.method + " is not supported");  // Missing HEAD 
@@ -233,10 +237,6 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 			else {
 				curlString += ' -w \'\n-----http-----%{http_code}\'';
-			}
-			// not encoded, we need to encode;
-			if (decodeURI(request.fullURL) == request.fullURL) {
-				request.fullURL = encodeURI(request.fullURL);
 			}
 			curlString += ' \'' + request.fullURL + '\'';
 			// log.info(curlString);
