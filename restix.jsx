@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.33
-* @Date: 2022-03-29
+* @Version: 1.34
+* @Date: 2023-01-23
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -120,7 +120,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			if (request.body) {
 				scriptCommands.push('xHttp.Send "' + request.body.replace(/"/g, '""').replace(/\n|\r/g, '') + '"');
 			}
-			else if (request.method == "POST" && request.binaryFilePath) {
+			else if ((request.method == "POST" || request.method == "PUT") && request.binaryFilePath) {
 				// http://www.vbforums.com/showthread.php?418570-RESOLVED-HTTP-POST-a-zip-file
 				scriptCommands.push('    Dim sFile');
 				scriptCommands.push('    sFile = "' + request.binaryFilePath + '"');
@@ -223,7 +223,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			if (request.body) {
 				curlString += ' -d \'' + request.body.replace(/"/g, '\\"').replace(/\n|\r/g, '') + '\'';
 			}
-			else if (request.method == "POST" && request.binaryFilePath) {
+			else if ((request.method == "POST" || request.method == "PUT") && request.binaryFilePath) {
 				curlString += ' --data-binary \'@' + request.binaryFilePath + '\'';
 			}
 
@@ -330,21 +330,6 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 		}
 		return response;
 	}
-
-	SELF.fetchFile = function (request, outFile) {
-		if (outFile == undefined) throw Error("No file provided");
-		if (outFile instanceof String) outFile = File(outFile);
-
-		request = INNER.checkRequest(request);
-		var response = INNER.processRequest(request, outFile);
-		if (!outFile.exists) {
-			response.error = true;
-			response.errorMsg = "File was not created\n" + response.errorMsg;
-		}
-		return response;
-	}
-
-
 
 })($.global, { toString: function () { return 'restix'; } });
 
