@@ -336,18 +336,8 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 // Example Request
 //  var request = {
-//  	url:"https://www.publishingx.de/dfdf",
-//  	method:"HEAD", // defaults to GET
+//  	url:"https://www.publishingx.de/",
 // }
-
-
 // var response = restix.fetch(request);
-// $.writeln(response.head.toSource());
-// $.writeln(response.httpStatus);
-
-//~ if (response.error) {
-//~ 	$.writeln("Response Error: " + response.error);
-//~ 	$.writeln("Response errorMsg: " + response.errorMsg);
-//~ }
-//~ $.writeln("Response HTTP Status: " + response.httpStatus);
-//~ $.writeln("Response Body: " + response.body);
+// $.writeln("Response HTTP Status: " + response.httpStatus);
+// $.writeln("Response Body: " + response.body);
