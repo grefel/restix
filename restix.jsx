@@ -47,10 +47,10 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		// Add port
 		if (request.port != "") {
-			request.fullURL = request.url + ":" + request.port;
+			request.fullURL = request.url + ":" + request.port + "/";
 		}
 		else {
-			request.fullURL = request.url;
+			request.fullURL = request.url + "/";
 		}
 
 		// Add command 
