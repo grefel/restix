@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.34
-* @Date: 2023-01-23
+* @Version: 1.35
+* @Date: 2023-06-20
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -324,6 +324,9 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		request = INNER.checkRequest(request);
 		var response = INNER.processRequest(request, outFile);
+		if (outFile.length == 0) {
+			outFile.remove();
+		}
 		if (!outFile.exists) {
 			response.error = true;
 			response.errorMsg = "File was not created\n" + response.errorMsg;
