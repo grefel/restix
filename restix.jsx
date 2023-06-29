@@ -55,7 +55,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 
 		// Add command 
 		if (request.command != "") {
-			request.fullURL = request.fullURL + "/" + request.command;
+			request.fullURL = request.fullURL + request.command;
 		}
 
 		// not encoded, we need to encode;

@@ -28,7 +28,6 @@ var testCase = "// Showing a resource";
 request = {
 	url:"https://jsonplaceholder.typicode.com",
 	command:"posts/1", 
-	unsafe:true
 }
 var response = restix.fetch(request);
 logResponse (response, testCase) ;
