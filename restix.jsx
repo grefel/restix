@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.35
-* @Date: 2023-06-20
+* @Version: 1.36
+* @Date: 2023-06-29
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
