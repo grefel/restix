@@ -1,5 +1,5 @@
-﻿#include lib/json2.js
-#include ../restix.jsx
+﻿//@#include lib/json2.js
+//@include ../restix.jsx
 
 //~ // Example Request
 //~ var request = {
