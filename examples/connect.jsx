@@ -1,4 +1,4 @@
-﻿//@#include lib/json2.js
+﻿//@include lib/json2.js
 //@include ../restix.jsx
 
 //~ // Example Request
