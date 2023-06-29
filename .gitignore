@@ -1,2 +1,4 @@
 
 restix_proxy.jsx
+examples/connect_local.jsx
+examples/lib/Base64.jsx
