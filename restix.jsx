@@ -7,8 +7,8 @@
 ## Getting started
 See examples/connect.jsx
 
-* @Version: 1.36
-* @Date: 2023-06-29
+* @Version: 1.37
+* @Date: 2023-10-28
 * @Author: Gregor Fellenz, http://www.publishingx.de
 * Acknowledgments: 
 ** Library design pattern from Marc Autret https://forums.adobe.com/thread/1111415
@@ -200,6 +200,9 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			}
 			catch (e) {
 				result = "doScriptError: " + e.message + " #" + e.number;
+				if (e.number == 104705) {
+					result += " Please start InDesign once with administrator rights. Close it and start it again as a normal user.";
+				}
 			}
 
 		}
