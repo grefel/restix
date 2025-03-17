@@ -1,6 +1,6 @@
 # Connect InDesign to the web
 * HTTPS supported 
-* Works form CS4 to CC 2023 (ExtendScript based library)
+* Works form CS4 to CC 2024 (ExtendScript based library)
 * Based on VBScript/ServerXMLHTTP (Win) AppleScript/curl (Mac) relies on app.doScript()
 
 ## Getting started
