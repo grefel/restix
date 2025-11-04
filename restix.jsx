@@ -21,7 +21,7 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 	* PRIVATE
 	*/
 	var INNER = {};
-	INNER.version = "2022-03-29-1.33";
+	INNER.version = "2025-11-04-1.4";
 
 
 	/** Returns if the operating system is windows 
@@ -224,8 +224,11 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 			if (request.method == "HEAD") {
 				curlString += ' -I --head ';
 			}
-			else {
+			else if (outFile) {
 				curlString += ' -X ' + request.method;
+			}
+			else {
+				curlString += ' -X ' + request.method + ' -i ';
 			}
 			if (request.body) {
 				curlString += ' -d \'' + request.body.replace(/"/g, '\\"').replace(/\n|\r/g, '') + '\'';
@@ -279,8 +282,20 @@ $.global.hasOwnProperty('restix') || (function (HOST, SELF) {
 						response.body = "";
 					}
 					else {
-						response.head = "";
-						response.body = resArray[0];
+						var headBodySplit = resArray[0].split(/\r\n?\r\n?/);
+						if (headBodySplit.length > 2) {
+							// multiple header sections (redirects)
+							response.head = headBodySplit[headBodySplit.length - 2];
+							response.body = headBodySplit.slice(-1)[0];
+						}
+						else if (headBodySplit.length == 2) {
+							response.head = headBodySplit[0];
+							response.body = headBodySplit[1];
+						}
+						else {
+							response.body = resArray[0];
+							response.head = "";
+						}
 					}
 					response.httpStatus = resArray[1] * 1;
 				}
